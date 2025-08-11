@@ -4,4 +4,6 @@ src/
 *.o
 # Ignore binary file
 *.bin
+# Ignore Image files
+*.iso
 *.swp
