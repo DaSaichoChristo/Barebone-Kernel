@@ -1,4 +1,7 @@
 # Ignore Source folder with bin utils and GCC cross compiler
 src/
+# Ignore compiled file
 *.o
+# Ignore binary file
+*.bin
 *.swp
