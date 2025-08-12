@@ -86,7 +86,8 @@ void terminal_scroll_down() {
       const size_t index = y * VGA_WIDTH + x;
       const size_t i = (y - 1) * VGA_WIDTH + x;
       char c = terminal_buffer[index] & 0xFF;
-      terminal_buffer[i] = vga_entry(c, terminal_color);
+      uint8_t color = (terminal_buffer[index] >> 8) & 0xFF;
+      terminal_buffer[i] = vga_entry(c, color);
     }
   }
   for (size_t x = 0; x < VGA_WIDTH; x++) {
@@ -95,7 +96,7 @@ void terminal_scroll_down() {
   }
 }
 
-void terminal_putchar(char c) {
+void terminal_putchar(char c, uint8_t color) {
 	if (c == '\n'){
 		terminal_row++;
 		terminal_column = 0;
@@ -106,24 +107,30 @@ void terminal_putchar(char c) {
 		return;
 	}
 		   
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+	terminal_putentryat(c, color, terminal_column, terminal_row);
 
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
+		if (++terminal_row == VGA_HEIGHT) {
 			terminal_scroll_down();
       terminal_row = VGA_HEIGHT - 1;
+    }
 	}
 }
 
-void terminal_write(const char* data, size_t size) {
+void terminal_write(const char* data, size_t size, uint8_t color) {
 	for (size_t i = 0; i < size; i++)
-		terminal_putchar(data[i]);
+		terminal_putchar(data[i], color);
 }
 
 void terminal_writestring(const char* data) {
-	terminal_write(data, strlen(data));
+	terminal_write(data, strlen(data), terminal_color);
 }
+
+void terminal_writestring_color (const char* data, uint8_t color) {
+	terminal_write(data, strlen(data), color);
+}
+
 
 void kernel_main(void) {
 	// Start terminal interface
@@ -131,5 +138,5 @@ void kernel_main(void) {
   for (size_t y = 0; y < VGA_HEIGHT; y++) {
 	  terminal_writestring("Hello, kernel World!\n");
   }
-  terminal_writestring("test\n");
+  terminal_writestring_color("test\n", vga_entry_color(VGA_COLOR_BLUE, VGA_COLOR_RED));
 }
